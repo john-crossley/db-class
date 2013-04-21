@@ -25,7 +25,7 @@ Assuming you have an ID field called `id` you can grab a record from its id. Thi
 **Insert a record**  
 If you would like to insert a record into the users table use this command
 
-	DB::table('users')->(array(
+	DB::table('users')->insert(array(
 		'username' => 'jonnothebonno',
 		'password' => sha1('password'),
 		'name' 	   => 'John Crossley'
