@@ -34,8 +34,22 @@ DB::connect([
 
 // var_dump( DB::table('users')->get() );
 
-$user = DB::table('users')->where(array('username' => 'jonnothebonno'))->grab(1)->get();
-var_dump( $user );
+// $user = DB::table('users')->where(array('username' => 'jonnothebonno'))->grab(1)->get();
+$data = DB::table('users')->grab(1)->get();
+
+
+
+$users = DB::raw('SELECT * FROM users');
+var_dump( $users );
+
+// $data = DB::table('users')
+//             ->where(array('username' => 'jonnothebonno'))
+//             ->update(array('username' => 'admin'));
+
+// DB::table('users')->where(array('username'=>'amar.dattani'))->delete();
+
+
+// var_dump( $data );
 
 // var_dump(
 // DB::table('users')->insert(array(

@@ -1,9 +1,9 @@
 ## Database Class
 
-I loved the way laravels DB fluent query builder worked, so I decided to knock one
-up. This operates in more or less the same way but not as full featured and still requires work.
+I really like Laravels fluent query builder, so I decided to build my own. Its not finished yet but perfectly usable, somethings can be improved but that will be done as I will actively be maintaining it. Feel free to use it =] and feedback would be great!
 
-**Connect to your database like so:**
+**Connect to the database**  
+First we need to create a connection to the database
 
 	DB::connect([
 		'host'	   => 'localhost',
@@ -11,30 +11,63 @@ up. This operates in more or less the same way but not as full featured and stil
 		'password' => 'password',
 		'database' => 'database_name'
 	]);
+	
+**Grab all the records from the users table**  
+This will return an array of objects.
 
-**You can use it like so:**
+	$users = DB::table('users')->get();
+	
+**Find a record by its ID**  
+Assuming you have an ID field called `id` you can grab a record from its id. This will return an object so you can access its properties: `$user->username`
+	
+	$user = DB::table('users')->find(1);
+	
+**Insert a record**  
+If you would like to insert a record into the users table use this command
 
-	DB::table('users')->get();
+	DB::table('users')->(array(
+		'username' => 'jonnothebonno',
+		'password' => sha1('password'),
+		'name' 	   => 'John Crossley'
+	));
+	
+**Update a record**  
+Update a record using this command
 
-This would return all of the records in the users table.
+	DB::update('users')->where(array(
+		// Where the current username is 'jonnothebonno'
+		'username' => 'jonnothebonno'
+	))->update(array(
+		// Update to be admin
+		'username' => 'admin'
+	));
+	
+**Delete a record**  
+Delete a record like so
 
-	DB::table('users')->find(1);
+	DB::table('users')
+		->where(array('username' => 'jonnothebonno'))
+		->delete();
 
-This would find a record by its ID.
+**Delete all records from users**
+	
+	// Must pass in TRUE otherwise this will fail.
+	DB::table('users')->delete(true);
 
-	DB::table('users')->where( [ 'username' => 'john-crossley' ] )->grab(1)->get();
+**Order records**  
+Order records ASC or DESC
+	
+	DB::table('users')->order('id', 'DESC')->get();
+	
+**Limit records pulled**  
+Limit records pulled from the database, if 1 is specified this will pull down 1 object to be accessed like `$record->property`. If more than 1 is pulled this will return an array of objects.
+	
+	DB::table('users')->grab(1)->get();
 
-You can chain the methods like shown above. This would return the record with
-the **username** **john-crossley**
+**RAW query**  
+It isn't yet full featured. So for now you can call the raw command to enter your own SQL.
+	
+	DB::raw('SELECT * FROM users');
+	
 
-Finally I'll show you one more because I wan't to get some breakfast ;)
-
-To insert data do:
-
-	DB::table('users')->insert([
-	   'username' => 'jonnothebonno',
-	   'email' => 'hello@phpcodemonkey.com',
-	   'name' => 'John Crossley'
-	 ]);
-
-You get the idea =]
+	
