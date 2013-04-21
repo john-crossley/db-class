@@ -5,7 +5,7 @@ up. This operates in more or less the same way but not as full featured and stil
 
 **Connecto to your database like so:**
 
-	DB::table('users')->connect([
+	DB::connect([
 		'host'	   => 'localhost',
 		'username' => 'root',
 		'password' => 'password',
