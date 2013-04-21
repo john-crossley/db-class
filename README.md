@@ -3,6 +3,15 @@
 I loved the way laravels DB fluent query builder worked, so I decided to knock one
 up. This operates in more or less the same way but not as full featured and still requires work.
 
+**Connecto to your database like so:**
+
+	DB::table('users')->connect([
+		'host'	   => 'localhost',
+		'username' => 'root',
+		'password' => 'password',
+		'database' => 'database_name'
+	]);
+
 **You can use it like so:**
 
 	DB::table('users')->get();
