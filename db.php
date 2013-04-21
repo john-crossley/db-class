@@ -53,6 +53,9 @@ class DB {
    */
   private $order;
 
+  /**
+   * Database connection values.
+   */
   private static $host = 'localhost',
                   $username = 'root',
                   $password = 'root',
@@ -111,6 +114,7 @@ class DB {
     $db = static::init();
     $db->table = $table;
     $db->queryData = NULL; // Reset
+    $db->query = NULL;
     return $db;
   }
 
@@ -227,6 +231,7 @@ class DB {
       $this->queryData[] = $value;
     }
     $this->query .= ');';
+
     return $this->performQuery('INSERT');
   }
 
@@ -294,8 +299,6 @@ class DB {
 
     // Prepare the query
     $sth = $this->pdo->prepare( $this->query );
-
-
 
     $sth->execute( $this->queryData );
 
