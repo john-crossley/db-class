@@ -2,6 +2,7 @@
 
 require 'db.php';
 require 'user.php';
+require 'crypter.php';
 
 function dd( $data ) {
 	echo "<pre>";
@@ -16,64 +17,33 @@ DB::connect([
   'database' => 'phpcodemonkey'
 ]);
 
-// $user = DB::table('users')->find(1);
-// var_dump( $user );
-
-// $user->age = 24;
-// $user->updated_at = time();
-
-
-// var_dump( $user );
-
-// $user->updated_at = time();
-
-// var_dump( $user );
-
-// $user->save();
-
-
-// var_dump( DB::table('users')->get() );
-
-// $user = DB::table('users')->where(array('username' => 'jonnothebonno'))->grab(1)->get();
-$data = DB::table('users')->grab(1)->get();
-
-
-
-$users = DB::raw('SELECT * FROM users');
-var_dump( $users );
-
-// $data = DB::table('users')
-//             ->where(array('username' => 'jonnothebonno'))
-//             ->update(array('username' => 'admin'));
-
-// DB::table('users')->where(array('username'=>'amar.dattani'))->delete();
-
-
-// var_dump( $data );
-
+// $password = Crypter::prepPassword('password', time().rand());
 // var_dump(
-// DB::table('users')->insert(array(
-//   'firstname' => 'John',
-//   'lastname' => 'Crossley',
-//   'username' => 'jonnothebonno',
-//   'password' => sha1('password'),
-//   'salt' => md5( time().mt_rand(1, 9) ),
-//   'email' => 'hello@phpcodemonkey.com',
-//   'gravatar_hash' => md5('hello@phpcodemonkey.com'),
-//   'created_at' => time(),
-//   'updated_at' => time()
-// ))
+//   DB::table('users')->insert(
+//     array(
+//       'username' => 'admin',
+//       'password' => $password['password'],
+//       'salt' => $password['salt'],
+//       'email' => 'hello@phpcodemonkey.com',
+//       'created_at' => date('Y-m-d H:i:s'),
+//       'updated_at' => date('Y-m-d H:i:s')
+//     )
+//   )
 // );
 
-// var_dump( DB::table('users')->get() );
+// $user = User::authenticate('admin', 'password');
+
+// $user = User::findByUsername('admin');
+
+// $user->firstname = "John";
+// $user->lastname = "Crossley";
+// $user->password = "password";
+
+// var_dump($user->save());
+
+// var_dump( $user );
 
 
-// $data = DB::table('users')->where(array(
-// 	'username'=>'james.mcavady'
-// ))->update(array(
-// 	'username' => 'jamesponcemcavady'
-// ));
 
-// $data = DB::table('users')->where(['username' => 'jamesponcemcavady'])->delete();
 
-// $data = DB::table('users')->get();
+
