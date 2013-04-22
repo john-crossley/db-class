@@ -10,24 +10,48 @@ class User {
   }
 
   /**
-   * Create a new instance of the user class.
+   * Create an instance of the user class
+   *
+   * Call this function to create an empty instance
+   * of the user class.
+   *
+   * @return object
    */
   public static function init() {
     if ( !self::$instance instanceof User )
       self::$instance = new User;
     return self::$instance;
   }
-
+  
+  /**
+   * Does this need an introduction?
+   *
+   * Allows you to call a property that doesn't exists.
+   * PHP will made this available if it can
+   */
   public function __get( $property ) {
     return (empty($this->userData->$property)) ? NULL : $this->userData->$property;
   }
-
+  
+  /**
+   * Set a property
+   *
+   * Set's a property on the user instance.
+   */
   public function __set( $property, $value ) {
     if ( !isset($this->userData) )
       $this->userData = new stdClass; // Maybe..?
     $this->userData->$property = $value;
   }
-
+  
+  /**
+   * Save the state of an object
+   *
+   * Saves the state of the user instance, will fail if anything
+   * is added that doesn't exist in the database.
+   *
+   * @return BOOL
+   */
   public function save() {
     $data = array();
     foreach ( $this->userData as $key => $value ) {
@@ -56,7 +80,15 @@ class User {
     }
     return DB::table('users')->where(array('id' => $this->id))->update($data);
   }
-
+  
+  /**
+   * Authenticate a user
+   *
+   * Authenticates a user, by supplyting the username and the password
+   * this file will securely authenticate a user account.
+   *
+   * return string // For now...
+   */
   public static function authenticate($username, $password) {
     // Try to fetch the record.
     $user = static::findByUsername($username);
@@ -76,7 +108,14 @@ class User {
       return 'Unable to retrieve record ' . $username . ' from the database.';
     }
   }
-
+  
+  /**
+   * Find a user by their username.
+   *
+   * Finds a user by their username.
+   *
+   * @return mixed - Object on success and NULL on failure.
+   */
   public static function findByUsername($username) {
     // Create an instance of a new user.
     $user = static::init();
@@ -90,7 +129,14 @@ class User {
     }
     return $user;
   }
-
+  
+  /**
+   * Find a user by their ID
+   *
+   * Finds a user by their ID.
+   *
+   * @return mixed - Returns an object on success and false of failure.
+   */
   public static function findById($id) {
     $user = static::init();
     $result = DB::table('users')->find($id);
