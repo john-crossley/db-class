@@ -1,49 +1,21 @@
 <?php
+// Require the boostrap file.
+require 'bootstrap.php';
+?>
 
-require 'db.php';
-require 'user.php';
-require 'crypter.php';
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+  <!--//META INFORMATION-->
+  <meta charset="utf-8">
+  <title>  </title>
 
-function dd( $data ) {
-	echo "<pre>";
-	print_r($data);
-	die("</pre>");
-}
-
-DB::connect([
-  'host' => 'localhost',
-  'username' => 'root',
-  'password' => 'root',
-  'database' => 'phpcodemonkey'
-]);
-
-// $password = Crypter::prepPassword('password', time().rand());
-// var_dump(
-//   DB::table('users')->insert(
-//     array(
-//       'username' => 'admin',
-//       'password' => $password['password'],
-//       'salt' => $password['salt'],
-//       'email' => 'hello@phpcodemonkey.com',
-//       'created_at' => date('Y-m-d H:i:s'),
-//       'updated_at' => date('Y-m-d H:i:s')
-//     )
-//   )
-// );
-
-// $user = User::authenticate('admin', 'password');
-
-// $user = User::findByUsername('admin');
-
-// $user->firstname = "John";
-// $user->lastname = "Crossley";
-// $user->password = "password";
-
-// var_dump($user->save());
-
-// var_dump( $user );
+  <!--//CSS-->
 
 
+</head>
+<body>
 
-
-
+  <!--//JS-->
+</body>
+</html>
