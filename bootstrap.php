@@ -1,5 +1,4 @@
 <?php
-
 define('ROOT', str_replace('\\', '/', dirname(__FILE__)) . '/');
 $path1 = explode('/', str_replace('\\', '/', dirname($_SERVER['SCRIPT_FILENAME'])));
 $path2 = explode('/', substr(ROOT, 0, -1));
