@@ -14,8 +14,12 @@ DB::connect([
 
 DB::debug();
 
+// var_dump(
+//   DB::table('users')->where('username', 'LIKE', '%J%')
+//                     ->or_where('username', 'LIKE', '%C%')
+//                     ->first()
+// );
+
 var_dump(
-  DB::table('users')->where('username', 'LIKE', '%J%')
-                    ->or_where('username', 'LIKE', '%C%')
-                    ->first()
+  DB::table('users')->distinct()->get()
 );

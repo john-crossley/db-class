@@ -168,6 +168,12 @@ class DB
     return $this;
   }
 
+  public function distinct()
+  {
+    $this->query = "SELECT DISTINCT * FROM $this->table";
+    return $this;
+  }
+
   public function order($column, $orderBy = 'DESC')
   {
     $this->order = $column . ' ' . strtoupper($orderBy);
