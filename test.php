@@ -20,6 +20,11 @@ DB::debug();
 //                     ->first()
 // );
 
+// var_dump(
+//   DB::table('users')->only('id')->get()
+// );
+
 var_dump(
-  DB::table('users')->distinct()->get()
+  DB::table('users')
+      ->count('id')
 );

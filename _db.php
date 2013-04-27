@@ -10,13 +10,10 @@
  */
 class DB
 {
-
   const SELECT = 'SELECT';
   const INSERT = 'INSERT';
   const UPDATE = 'UPDATE';
   const DELETE = 'DELETE';
-  // const FIRST = 'FIRST';
-  // const LAST = 'LAST';
   const FETCH_ALL = 'ALL_RECORDS';
   const FETCH_SINGLE = 'SINGLE_RECORD';
 
@@ -106,6 +103,36 @@ class DB
     return $connection;
   }
 
+  public function min($column)
+  {
+    $this->query = "SELECT MIN($column) FROM $this->table";
+    return $this->performQuery();
+  }
+
+  public function max($column)
+  {
+    $this->query = "SELECT MAX($column) FROM $this->table";
+    return $this->performQuery();
+  }
+
+  public function avg($column)
+  {
+    $this->query = "SELECT AVG($column) FROM $this->table";
+    return $this->performQuery();
+  }
+
+  public function sum($column)
+  {
+    $this->query = "SELECT SUM($column) FROM $this->table";
+    return $this->performQuery();
+  }
+
+  public function count($column)
+  {
+    $this->query = "SELECT COUNT($column) FROM users";
+    return $this->performQuery();
+  }
+
   protected function describe()
   {
     // We only need to return the first column
@@ -136,6 +163,16 @@ class DB
     return $this->performQuery();
   }
 
+  public function order($column, $orderBy)
+  {
+    if (empty($this->order)) {
+      $this->order = ' ORDER BY ' . $column . ' ' . strtoupper($orderBy);
+    } else {
+      $this->order .= ', ' . $column . ' ' . strtoupper($orderBy);
+    }
+    return $this;
+  }
+
   public static function raw($query, $fetch = DB::FETCH_ALL)
   {
     // Get an instance of the database object
@@ -155,16 +192,25 @@ class DB
 
   public function where($field, $condition, $value)
   {
-    $this->whereQuery = " WHERE $field $condition '$value'";
+    // Do we have a where clause already? If we do then
+    // append an AND if not create one.
+    $where = "$field $condition '$value'";
+    if (empty($this->whereQuery)) {
+      $this->whereQuery = " WHERE " . $where;
+    } else {
+      $this->whereQuery .= " AND " . $where;
+    }
     return $this;
   }
 
   public function or_where($field, $condition, $value)
   {
-    if (empty($this->whereQuery))
-      throw new Exception("You must provide an initial where clause before extending!");
-
-    $this->whereQuery .= " OR $field $condition '$value'";
+    $where = "$field $condition '$value'";
+    if (empty($this->whereQuery)) {
+      $this->whereQuery = " WHERE " . $where;
+    } else {
+      $this->whereQuery .= " OR " . $where;
+    }
     return $this;
   }
 
@@ -174,9 +220,14 @@ class DB
     return $this;
   }
 
-  public function order($column, $orderBy = 'DESC')
+  public function only()
   {
-    $this->order = $column . ' ' . strtoupper($orderBy);
+    $columns = func_get_args(); // Grab the arguments
+    if (empty($columns)) {
+      $columns[] = '*';
+    }
+    $this->query = 'SELECT ' . implode(', ', $columns) .
+      ' FROM ' . $this->table;
     return $this;
   }
 
@@ -223,6 +274,4 @@ class DB
         break;
     }
   }
-
-
 }
