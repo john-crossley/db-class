@@ -8,25 +8,4 @@ DB::connect([
   'database' => 'aum'
 ]);
 
-// var_dump(
-//   DB::table('users')->where(array('username' => 'jonnothebonno'))->get()
-// );
-
-DB::debug();
-
-// var_dump(
-//   DB::table('users')->where('username', 'LIKE', '%J%')
-//                     ->or_where('username', 'LIKE', '%C%')
-//                     ->first()
-// );
-
-// var_dump(
-//   DB::table('users')->only('id')->get()
-// );
-
-// var_dump(
-//   DB::table('users')->grab(1)->get()
-// );
-
-$sum = DB::table('users')->sum('id');
-echo $sum->sum;
+DB::debug(); // Enable debug mode

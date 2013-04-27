@@ -212,11 +212,12 @@ class DB
     $this->query = "SELECT AVG($column) as average FROM $this->table";
     return $this->performQuery();
   }
-/**
- * Get the sum of a column
- * @param  integer $column The name of the column to return the sum
- * @return integer|false
- */
+
+  /**
+  * Get the sum of a column
+  * @param  integer $column The name of the column to return the sum
+  * @return integer|false
+  */
   public function sum($column)
   {
     $this->limit = 1;
@@ -246,6 +247,11 @@ class DB
     return $this;
   }
 
+  /**
+   * Pulls the information of a table schema, so the the class can
+   * know what it needs to know... mwahaha -.- (Shifty Eyes)
+   * @return object|bool
+   */
   protected function describe()
   {
     // We only need to return the first column
@@ -255,11 +261,19 @@ class DB
     return $this->schema;
   }
 
+  /**
+   * Perform the query and get the results.
+   * @return object|bool
+   */
   public function get()
   {
     return $this->performQuery();
   }
 
+  /**
+   * Get the first record of a column
+   * @return object|bool
+   */
   public function first()
   {
     $schema = $this->describe();
@@ -268,6 +282,10 @@ class DB
     return $this->performQuery();
   }
 
+  /**
+   * Get the last record of a column
+   * @return object|boolean
+   */
   public function last()
   {
     $schema = $this->describe();
@@ -344,6 +362,76 @@ class DB
     return $this;
   }
 
+  /**
+   * Insert a record into the database
+   * @param  array  $data The data to be inserted formatted as assoc array
+   * @return integer|bool The last insert ID and false on failure
+   */
+  public function insert(array $data)
+  {
+    // Build the first section of the query
+    $this->query = 'INSERT INTO ' . $this->table . ' (';
+    $tmp = '';
+
+    foreach ($data as $key => $value) {
+      $this->query .= $tmp . $key;
+      $tmp = ', ';
+    }
+
+    // Middle section of the query
+    $this->query .= ') VALUES (';
+    $tmp = '';
+
+    // Build the final section of the query
+    foreach ($data as $key => $value) {
+      $this->query .= $tmp . '?';
+      $tmp = ', ';
+      $this->queryData[] = $value;
+    }
+    $this->query .= ');';
+    // Send the query off for processing
+    return $this->performQuery(DB::INSERT);
+  }
+
+  /**
+   * Update a record in the database, ensure you supply a where clause
+   * @param  array  $data The data used to update the record
+   * @return bool
+   */
+  public function update(array $data)
+  {
+    $this->query = 'UPDATE ' . $this->table . ' SET ';
+    $tmp = '';
+    $whereData = $this->queryData; // Store this data for a rainy day
+    $this->queryData = array(); // Reset the query data
+    // Start to build the query
+    foreach ($data as $key => $value) {
+      $this->query .= $tmp . $key . ' = ?';
+      $tmp = ', ';
+      $this->queryData[] = $value;
+    }
+    // Merge the data using this cheap and dirty yet very effective method
+    // ...
+    // SOLD!
+    $this->queryData = array_merge($this->queryData, $whereData);
+    // Perform the query
+    return $this->performQuery('UPDATE');
+  }
+
+  /**
+   * To delete a record from the database
+   * @param  boolean $all To delete all the records must pass true
+   * @return bool
+   */
+  public function delete($all = false)
+  {
+    if (empty($this->whereQuery) && $all === false) {
+      throw new Exception("WARNING! You are about to delete all records. Confirm!");
+    }
+    $this->query = 'DELETE FROM ' . $this->table;
+    return $this->performQuery('DELETE');
+  }
+
   private function performQuery($queryType = DB::SELECT)
   {
     // Do we have an empty query?
@@ -382,9 +470,15 @@ class DB
         return ($this->limit == 1) ? $sth->fetch() : $sth->fetchAll();
         break;
       case 'INSERT':
+        // Could maybe go around this a little bit better?
+        if ($sth->rowCount() > 0) {
+          return $this->connection->lastInsertId('id');
+        }
+        return false;
+        break;
       case 'UPDATE':
       case 'DELETE':
-        return true;
+        return ($sth->rowCount() > 0) ? true : false;
         break;
       default:
         return false;
