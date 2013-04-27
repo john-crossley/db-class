@@ -24,7 +24,9 @@ DB::debug();
 //   DB::table('users')->only('id')->get()
 // );
 
-var_dump(
-  DB::table('users')
-      ->count('id')
-);
+// var_dump(
+//   DB::table('users')->grab(1)->get()
+// );
+
+$sum = DB::table('users')->sum('id');
+echo $sum->sum;

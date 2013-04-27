@@ -10,6 +10,9 @@
  */
 class DB
 {
+  /**
+   * CLASS CONSTANTS
+   */
   const SELECT = 'SELECT';
   const INSERT = 'INSERT';
   const UPDATE = 'UPDATE';
@@ -17,24 +20,76 @@ class DB
   const FETCH_ALL = 'ALL_RECORDS';
   const FETCH_SINGLE = 'SINGLE_RECORD';
 
+  /**
+   * Stores an instance of the database object
+   * @var object
+   */
   private static $instance = null;
+
+  /**
+   * Stores an instance of the PDO class
+   * @var object
+   */
   private $connection = null;
 
+  /**
+   * The hostname of the database
+   * @var string
+   */
   private static $host = "localhost";
+
+  /**
+   * The username of the database
+   * @var string
+   */
   private static $username = "root";
+
+  /**
+   * The password of the database
+   * @var string
+   */
   private static $password = "root";
+
+  /**
+   * The database name you would like to connect to
+   * @var string
+   */
   private static $database = "";
 
+  /**
+   * The name of the table in question
+   * @var string
+   */
   private $table = '';
+
+  /**
+   * The current query string
+   * @var string
+   */
   private $query = '';
+
+  /**
+   * The limit of rows to be returned
+   * @var integer
+   */
   private $limit = null;
+
+  /**
+   * The query data to be used for prepared statements
+   * array('John', 'Doe', 'john.doe@example.com')
+   * @var array
+   */
   private $queryData = array();
   private $whereQuery = '';
   private $order = '';
   private $schema = null;
   private $debug = false;
+  private $messages = null;
 
-
+  /**
+   * Enable debug mode inside the DB class
+   * @return NULL
+   */
   public static function debug()
   {
     $db = static::init();
@@ -91,8 +146,16 @@ class DB
     self::$database = $data['database'];
   }
 
+  /**
+   * Specify the table in which we are performing
+   * queries on.
+   * @param  [type] $table [description]
+   * @return [type]        [description]
+   */
   public static function table($table)
   {
+    // todo Maybe check to see if the table is valid?
+
     // Get an instance of the database.
     $connection = static::init();
     $connection->table = $table;
@@ -103,34 +166,84 @@ class DB
     return $connection;
   }
 
+  /**
+   * This function assumes you have an ID field in the table you
+   * specified. This will return the ID of the row
+   * @param  integer $id The id of the row
+   * @return object|bool
+   */
+  public function find($id)
+  {
+    // Specify the where
+    $this->where('id', '=', (int)$id)->grab(1);
+    return $this->performQuery();
+  }
+
+  /**
+   * Get the minimum value of the specified columns
+   * @param  string $column The name of the column
+   * @return array|bool
+   */
   public function min($column)
   {
-    $this->query = "SELECT MIN($column) FROM $this->table";
+    $this->query = "SELECT MIN($column) as min FROM $this->table";
     return $this->performQuery();
   }
 
+  /**
+   * Get the maximum value for the specified
+   * @param  string $column The name of the column to find maximum.
+   * @return integer|false
+   */
   public function max($column)
   {
-    $this->query = "SELECT MAX($column) FROM $this->table";
+    $this->limit = 1; // Set the limit
+    $this->query = "SELECT MAX($column) as max FROM $this->table";
     return $this->performQuery();
   }
 
+  /**
+   * Get the average of a column
+   * @param  string $column The name of the column to get the average for
+   * @return integer|false
+   */
   public function avg($column)
   {
-    $this->query = "SELECT AVG($column) FROM $this->table";
+    $this->query = "SELECT AVG($column) as average FROM $this->table";
     return $this->performQuery();
   }
-
+/**
+ * Get the sum of a column
+ * @param  integer $column The name of the column to return the sum
+ * @return integer|false
+ */
   public function sum($column)
   {
-    $this->query = "SELECT SUM($column) FROM $this->table";
+    $this->limit = 1;
+    $this->query = "SELECT SUM($column) AS sum FROM $this->table";
     return $this->performQuery();
   }
 
-  public function count($column)
+  /**
+   * Get the count of the items in a column
+   * @param  string $column The name of the column
+   * @return [type]         [description]
+   */
+  public function count($column = '*')
   {
-    $this->query = "SELECT COUNT($column) FROM users";
+    $this->query = "SELECT COUNT($column) as count FROM users";
     return $this->performQuery();
+  }
+
+  /**
+   * The number of rows you would like returned
+   * @param  int $limit The limit you would like to set
+   * @return object Returns an instance of the object class
+   */
+  public function grab($limit)
+  {
+    $this->limit = (int)$limit;
+    return $this;
   }
 
   protected function describe()
@@ -248,6 +361,10 @@ class DB
     if (!empty($this->order)) {
       $this->query .= $this->order;
     }
+
+    // Any limitations
+    if (!empty($this->limit) && $queryType != 'UPDATE')
+      $this->query .= ' LIMIT ' . $this->limit;
 
     if ($this->debug === true) {
       var_dump($this->query);
