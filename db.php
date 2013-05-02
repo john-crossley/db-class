@@ -186,21 +186,15 @@ class DB
   /**
    * Specify the table in which we are performing
    * queries on.
-   * @param  [type] $table [description]
-   * @return [type]        [description]
+   * @param  string $table The name of the table
+   * @return An instance of the db class
    */
   public static function table($table)
   {
-    // todo Maybe check to see if the table is valid?
-
-    // Get an instance of the database.
+    // TODO Check to see if the table is valid?
     $conn = static::init();
     $conn->table = $table;
     $conn->reset();
-    // TODO Reset the database query data.
-    // $connection->query = '';
-    // $connection->queryData = array();
-    // $connection->whereQuery = '';
     return $conn;
   }
 
@@ -236,6 +230,7 @@ class DB
    */
   public function min($column)
   {
+    $this->limit = 1;
     $this->query = "SELECT MIN($column) as min FROM $this->table";
     return $this->execute();
   }
@@ -247,7 +242,7 @@ class DB
    */
   public function max($column)
   {
-    $this->limit = 1; // Set the limit
+    $this->limit = 1;
     $this->query = "SELECT MAX($column) as max FROM $this->table";
     return $this->execute();
   }
@@ -259,6 +254,7 @@ class DB
    */
   public function avg($column)
   {
+    $this->limit = 1;
     $this->query = "SELECT AVG($column) as average FROM $this->table";
     return $this->execute();
   }
@@ -282,6 +278,7 @@ class DB
    */
   public function count($column = '*')
   {
+    $this->limit = 1;
     $this->query = "SELECT COUNT($column) as count FROM $this->table";
     return $this->execute();
   }
@@ -304,12 +301,18 @@ class DB
    */
   protected function getPrimaryKey()
   {
+    $query = $this->query; // Backup query.
+
     $this->query = 'SHOW KEYS FROM ' . $this->table . ' WHERE Key_name = \'PRIMARY\'';
     $result = $this->execute(DB::SELECT, DB::FETCH_ALL);
 
     if (empty($result)) return false; // Nothing found prevent errors.
 
     $primaryKey = $result[0]->Column_name;
+
+    // Ok replace query
+    $this->query = $query;
+
     return $primaryKey;
   }
 
@@ -328,7 +331,7 @@ class DB
    */
   public function first()
   {
-    $primaryKey = $this->getPrimaryKey();
+    $primaryKey = $this->getPrimaryKey(); // Should be clear.
     $this->order = ' ORDER BY ' . $primaryKey . ' LIMIT 1';
     return $this->execute();
   }
@@ -339,9 +342,8 @@ class DB
    */
   public function last()
   {
-    $schema = $this->getPrimaryKey();
-    $field = $schema->Field;
-    $this->order = " ORDER BY $field DESC LIMIT 1";
+    $primaryKey = $this->getPrimaryKey();
+    $this->order = ' ORDER BY ' . $primaryKey . ' DESC LIMIT 1';
     return $this->execute();
   }
 
@@ -409,6 +411,7 @@ class DB
       $columns[] = '*';
     }
     $this->query = 'SELECT ' . implode(', ', $columns) . ' FROM ' . $this->table;
+
     return $this;
   }
 
@@ -492,7 +495,7 @@ class DB
    * then an array of objects will be returned, finally if a user requests one
    * records then an object will be returned.
    */
-  private function execute($type = DB::SELECT, $records = DB::FETCH_SINGLE)
+  private function execute($type = DB::SELECT, $records = DB::FETCH_ALL)
   {
     if (empty($this->query) === true)
       $this->query = 'SELECT * FROM ' . $this->table;
@@ -515,11 +518,14 @@ class DB
 
     $sth = $this->connection->prepare($this->query);
     $sth->execute($this->queryData);
+
+    $limit = $this->limit;
+
     $this->reset();
 
     switch ($type) {
       case 'SELECT':
-        return ($records === DB::FETCH_SINGLE) ? $sth->fetch() : $sth->fetchAll();
+        return ($limit == 1) ? $sth->fetch() : $sth->fetchAll();
         break;
       case 'INSERT':
         // This could be done a better way but for now... its fine!

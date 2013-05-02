@@ -8,11 +8,8 @@ DB::connect([
   'database' => 'aum'
 ]);
 
-DB::debug(); // Enable debug mode
+// DB::debug(); // Enable debug mode
 
-// $users = DB::table('users')->get(); // Get all records from users table.
+$data = DB::table('users')->only('email')->findById(1);
 
-$user = DB::table('users')->first();
-
-
-var_dump($user);
+var_dump($data);
