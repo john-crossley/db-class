@@ -147,6 +147,29 @@ class DB
   }
 
   /**
+   * Allows the creation of dynamic methods. Still needs some
+   * work and far from complete.
+   * @param  string $method The name of the method
+   * @param  array $params The params for the method
+   * @return mixed
+   */
+  public function __call($method, $params)
+  {
+    // Room for much improvement works for now.
+    if (!preg_match('/^(find)By(\w+)$/', $method, $matches)) {
+      throw new Exception("Call to undefined method {$method}");
+    }
+    // Todo OR??
+    $criteriaKeys = explode('And', preg_replace('/([a-z0-9])([A-Z])/', '$1$2', $matches[2]));
+    $criteriaKeys = array_map('strtolower', $criteriaKeys);
+    $criteriaValues = array_slice($params, 0, count($criteriaKeys));
+    $criteria = array_combine($criteriaKeys, $criteriaValues);
+
+    $method = $matches[1];
+    return $this->$method($criteria);
+  }
+
+  /**
    * Specify the table in which we are performing
    * queries on.
    * @param  [type] $table [description]
@@ -172,10 +195,22 @@ class DB
    * @param  integer $id The id of the row
    * @return object|bool
    */
-  public function find($id)
+  public function find($data)
   {
-    // Specify the where
-    $this->where('id', '=', (int)$id)->grab(1);
+
+    // What have we been passed?
+    if (is_array($data)) {
+      // We have been passed an array
+
+      foreach ($data as $key => $value) {
+        $this->where($key, '=', $value);
+      }
+
+    } else if (is_int($data)) {
+      // Assume this is an ID - Could change?
+      $this->where('id', '=', (int)$data)->grab(1);
+    }
+
     return $this->performQuery();
   }
 
@@ -232,7 +267,7 @@ class DB
    */
   public function count($column = '*')
   {
-    $this->query = "SELECT COUNT($column) as count FROM users";
+    $this->query = "SELECT COUNT($column) as count FROM $this->table";
     return $this->performQuery();
   }
 
