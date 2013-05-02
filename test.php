@@ -10,8 +10,9 @@ DB::connect([
 
 DB::debug(); // Enable debug mode
 
-// $data = DB::table('settings')->get();
-$data = DB::table('settings')->find(1);
-var_dump($data);
+// $users = DB::table('users')->get(); // Get all records from users table.
 
-// var_dump( DB::table('settings')->findByUsername('jonnothebonno') );
+$user = DB::table('users')->first();
+
+
+var_dump($user);

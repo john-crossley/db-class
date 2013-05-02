@@ -17,8 +17,8 @@ class DB
   const INSERT = 'INSERT';
   const UPDATE = 'UPDATE';
   const DELETE = 'DELETE';
-  const FETCH_ALL = 'ALL_RECORDS';
-  const FETCH_SINGLE = 'SINGLE_RECORD';
+  const FETCH_ALL = 'FETCH_ALL';
+  const FETCH_SINGLE = 'FETCH_SINGLE';
 
   /**
    * Stores an instance of the database object
@@ -170,6 +170,20 @@ class DB
   }
 
   /**
+   * Reset all of the sql data, if not done
+   * this can cause conflicts when querying.
+   * @return NULL
+   */
+  private function reset()
+  {
+    $conn = static::init();
+    $conn->query = '';
+    $conn->queryData = array();
+    $conn->whereQuery = '';
+    $conn->limit = null;
+  }
+
+  /**
    * Specify the table in which we are performing
    * queries on.
    * @param  [type] $table [description]
@@ -180,13 +194,14 @@ class DB
     // todo Maybe check to see if the table is valid?
 
     // Get an instance of the database.
-    $connection = static::init();
-    $connection->table = $table;
+    $conn = static::init();
+    $conn->table = $table;
+    $conn->reset();
     // TODO Reset the database query data.
-    $connection->query = '';
-    $connection->queryData = array();
-    $connection->whereQuery = '';
-    return $connection;
+    // $connection->query = '';
+    // $connection->queryData = array();
+    // $connection->whereQuery = '';
+    return $conn;
   }
 
   /**
@@ -211,7 +226,7 @@ class DB
       $this->where('id', '=', (int)$data)->grab(1);
     }
 
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -222,7 +237,7 @@ class DB
   public function min($column)
   {
     $this->query = "SELECT MIN($column) as min FROM $this->table";
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -234,7 +249,7 @@ class DB
   {
     $this->limit = 1; // Set the limit
     $this->query = "SELECT MAX($column) as max FROM $this->table";
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -245,7 +260,7 @@ class DB
   public function avg($column)
   {
     $this->query = "SELECT AVG($column) as average FROM $this->table";
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -257,7 +272,7 @@ class DB
   {
     $this->limit = 1;
     $this->query = "SELECT SUM($column) AS sum FROM $this->table";
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -268,7 +283,7 @@ class DB
   public function count($column = '*')
   {
     $this->query = "SELECT COUNT($column) as count FROM $this->table";
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -287,13 +302,15 @@ class DB
    * know what it needs to know... mwahaha -.- (Shifty Eyes)
    * @return object|bool
    */
-  protected function describe()
+  protected function getPrimaryKey()
   {
-    // We only need to return the first column
-    if (empty($this->schema)) {
-      $this->schema = static::raw('DESCRIBE ' . $this->table, DB::FETCH_SINGLE);
-    }
-    return $this->schema;
+    $this->query = 'SHOW KEYS FROM ' . $this->table . ' WHERE Key_name = \'PRIMARY\'';
+    $result = $this->execute(DB::SELECT, DB::FETCH_ALL);
+
+    if (empty($result)) return false; // Nothing found prevent errors.
+
+    $primaryKey = $result[0]->Column_name;
+    return $primaryKey;
   }
 
   /**
@@ -302,7 +319,7 @@ class DB
    */
   public function get()
   {
-    return $this->performQuery();
+    return $this->execute();
   }
 
   /**
@@ -311,10 +328,9 @@ class DB
    */
   public function first()
   {
-    $schema = $this->describe();
-    $field = $schema->Field;
-    $this->order = " ORDER BY $field LIMIT 1";
-    return $this->performQuery();
+    $primaryKey = $this->getPrimaryKey();
+    $this->order = ' ORDER BY ' . $primaryKey . ' LIMIT 1';
+    return $this->execute();
   }
 
   /**
@@ -323,10 +339,10 @@ class DB
    */
   public function last()
   {
-    $schema = $this->describe();
+    $schema = $this->getPrimaryKey();
     $field = $schema->Field;
     $this->order = " ORDER BY $field DESC LIMIT 1";
-    return $this->performQuery();
+    return $this->execute();
   }
 
   public function order($column, $orderBy)
@@ -392,8 +408,7 @@ class DB
     if (empty($columns)) {
       $columns[] = '*';
     }
-    $this->query = 'SELECT ' . implode(', ', $columns) .
-      ' FROM ' . $this->table;
+    $this->query = 'SELECT ' . implode(', ', $columns) . ' FROM ' . $this->table;
     return $this;
   }
 
@@ -425,7 +440,7 @@ class DB
     }
     $this->query .= ');';
     // Send the query off for processing
-    return $this->performQuery(DB::INSERT);
+    return $this->execute(DB::INSERT);
   }
 
   /**
@@ -450,7 +465,7 @@ class DB
     // SOLD!
     $this->queryData = array_merge($this->queryData, $whereData);
     // Perform the query
-    return $this->performQuery('UPDATE');
+    return $this->execute(DB::UPDATE);
   }
 
   /**
@@ -464,52 +479,51 @@ class DB
       throw new Exception("WARNING! You are about to delete all records. Confirm!");
     }
     $this->query = 'DELETE FROM ' . $this->table;
-    return $this->performQuery('DELETE');
+    return $this->execute(DB::DELETE);
   }
 
-  private function performQuery($queryType = DB::SELECT)
+  /**
+   * This method builds the query from the rest of the information supplied
+   * by the chaining. This could be done a little better but for now works.
+   * @param  const $type    What type of action should be carried out?
+   * @param  const $records How many records are to be fetched
+   * @return array|bool|object Depends on what data is requested. If the query
+   * fails then false will be returned. If the client requests multiple rows
+   * then an array of objects will be returned, finally if a user requests one
+   * records then an object will be returned.
+   */
+  private function execute($type = DB::SELECT, $records = DB::FETCH_SINGLE)
   {
-    // Do we have an empty query?
-    if (empty($this->query) === true) {
-      // Create a generic select statement
-      $this->query = "SELECT * FROM " . $this->table;
-    }
+    if (empty($this->query) === true)
+      $this->query = 'SELECT * FROM ' . $this->table;
 
-    // Build the query
-    if (!empty($this->whereQuery)) {
+    if (!empty($this->whereQuery))
       $this->query .= $this->whereQuery;
-    }
 
-    // Any ordering?
-    if (!empty($this->order)) {
+    if (!empty($this->order))
       $this->query .= $this->order;
-    }
 
-    // Any limitations
-    if (!empty($this->limit) && $queryType != 'UPDATE')
+    if (!empty($this->limit) && $type !== 'UPDATE')
       $this->query .= ' LIMIT ' . $this->limit;
 
+    // DEBUGGING
     if ($this->debug === true) {
       var_dump($this->query);
+      var_dump($this->queryData);
+      var_dump($this->whereQuery);
     }
 
-    // Prepare the query
     $sth = $this->connection->prepare($this->query);
-
-    // Execute the query
     $sth->execute($this->queryData);
+    $this->reset();
 
-    // Which query does the client want performed?
-    switch ($queryType) {
+    switch ($type) {
       case 'SELECT':
-        return ($this->limit == 1) ? $sth->fetch() : $sth->fetchAll();
+        return ($records === DB::FETCH_SINGLE) ? $sth->fetch() : $sth->fetchAll();
         break;
       case 'INSERT':
-        // Could maybe go around this a little bit better?
-        if ($sth->rowCount() > 0) {
-          return $this->connection->lastInsertId('id');
-        }
-        return false;
+        // This could be done a better way but for now... its fine!
+        return ($sth->rowCount() > 0) ? $this->connection->lastInsertId('id') : false;
         break;
       case 'UPDATE':
       case 'DELETE':
@@ -520,4 +534,5 @@ class DB
         break;
     }
   }
+
 }
