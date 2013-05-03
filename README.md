@@ -1,73 +1,140 @@
-## Database Class
+# My Super Awesome Query Builder!
 
-I really like Laravels fluent query builder, so I decided to build my own. Its not finished yet but perfectly usable, somethings can be improved but that will be done as I will actively be maintaining it. Feel free to use it =] and feedback would be great!
+I have built a simple more-or-less full featured database query builder. It works similar to laravels amazing fluent query builder only I decided to buid my own ^_^ This is not final but can be used, modified and extended. If you'd like me to add anything else or change something lemme know.
 
-**Connect to the database**  
-First we need to create a connection to the database
+Right so, using this is sooo simple. Continue reading to learn how!
 
-	DB::connect([
-		'host'	   => 'localhost',
-		'username' => 'root',
-		'password' => 'password',
-		'database' => 'database_name'
-	]);
-	
-**Grab all the records from the users table**  
-This will return an array of objects.
+## Instructions
+Right, so to start off I will be using a database called `phpcodemonkey` with a table called `users` which contain the following columns:
+    
+  - id
+  - firstname
+  - lastname
+  - username
+  - password
+  - email
 
-	$users = DB::table('users')->get();
-	
-**Find a record by its ID**  
-Assuming you have an ID field called `id` you can grab a record from its id. This will return an object so you can access its properties: `$user->username`
-	
-	$user = DB::table('users')->find(1);
-	
-**Insert a record**  
-If you would like to insert a record into the users table use this command
+Easy right?
 
-	DB::table('users')->insert(array(
-		'username' => 'jonnothebonno',
-		'password' => sha1('password'),
-		'name' 	   => 'John Crossley'
-	));
-	
-**Update a record**  
-Update a record using this command
+### Connect
+To connect to the database we simply call the following command:
+    
+    DB::connect(array(
+        'host' => 'localhost',
+        'username' => 'root',
+        'password' => 'root',
+        'database' => 'phpcodemonkey'
+    ));
 
-	DB::update('users')->where(array(
-		// Where the current username is 'jonnothebonno'
-		'username' => 'jonnothebonno'
-	))->update(array(
-		// Update to be admin
-		'username' => 'admin'
-	));
-	
-**Delete a record**  
-Delete a record like so
+### Get
+I want to retrieve all the records from the database.
+    
+    DB::table('users')->get();
 
-	DB::table('users')
-		->where(array('username' => 'jonnothebonno'))
-		->delete();
+This as is will return an array of objects. If no results are found then an empty array will be returned.
 
-**Delete all records from users**
-	
-	// Must pass in TRUE otherwise this will fail.
-	DB::table('users')->delete(true);
+### Find
+This method assumes you have an ID field named... `id` This can be changed to check this but I dunno.. I guess it's common sense to have an ID field eh?
 
-**Order records**  
-Order records ASC or DESC
-	
-	DB::table('users')->order('id', 'DESC')->get();
-	
-**Limit records pulled**  
-Limit records pulled from the database, if 1 is specified this will pull down 1 object to be accessed like `$record->property`. If more than 1 is pulled this will return an array of objects.
-	
-	DB::table('users')->grab(1)->get();
+    DB::table('users')->find(1);
 
-**RAW query**  
-It isn't yet full featured. So for now you can call the raw command to enter your own SQL.
-	
-	DB::raw('SELECT * FROM users');
-	
+This will return the row matching the specified ID. This will return a single object on success and false when nothing is found.
 
-	
+### Find using dynamic methods
+Don't you just hate it when you can't remember the name of a method? Me too! Thats why I decided to incorporate dynamic methods into this class. So the way this works is simple you can find data using any columns that already exist in the database, lemme show ya.
+
+    DB::table('users')->findByUsername('jonnothebonno');
+    
+    DB::table('users')->findByFirstname('John');
+    
+    DB::table('users')->findByEmail('hello@phpcodemonkey.com');
+
+You get the idea right? and now how about finding using multiple where clauses?
+
+    DB::table('users')->findByUsernameAndPassword('jonnothebonno', 'password');
+    
+*I'm working on expanding this, so hold on folks. So that you can match OR etc.*
+
+
+### First and Last
+Sometimes you just wanna grab the first and last records from a database. Well you can…
+
+    DB::table('users')->first();
+
+    DB::table('users')->last();
+
+*along with*
+
+    DB::table('users')->only('username')->first();
+    DB::table('users')->only('username', 'password', 'email')->last();
+    
+### Where
+We all need to specify wheres from time to time and with and with this wrapper its pie.
+
+    DB::table('users')->where('username', '=', 'jonnothebonno')->get();
+    
+You can chain where clauses like so:
+
+    DB::table('users')
+             ->where('username', '=', 'jonnothebonno')
+             ->where('id', '=', 1)
+             ->get();
+
+**Note:** By doing this you will produce an AND chained where clause, if you would like to produce an OR_WHERE simply do:
+
+    DB::table('users')
+             ->where('id', '>', 1)
+             ->or_where('email', '=', 'hello@phpcodemonkey.com')
+             ->get();
+
+### Limit
+If you want to limit records pulled from a database append this before you call any methods that will retrieve data.
+
+    DB::table('users')->only('username')->grab(300)->get();
+    
+This will return only the usernames of 300 records.
+
+We can apply some order to these results like so:
+    
+    DB::table('users')->only('username')->grab(300)->order('id', 'ASC')->get();
+    
+These can be applied in any order providing its after the table() and before the get method.
+
+* * *
+
+### Inserting
+
+To insert into the database we can use the following methods.
+
+    $id = DB::table('users')->insert([
+      'username' => 'poppy123',
+      'email' => 'poppy@example.com',
+      'password' => sha1('password'),
+      'firstname' => 'Poppy',
+      'lastname' => 'McGowan'
+    ]);
+
+Using the insert function will return the ID if successful and false on failure.
+
+* * *
+
+### MAX, MIN, AVG and COUNT
+
+Find the maximum, minimum, average and count values of a columns with the following methods.
+
+    DB::table('users')->max();
+    
+    DB::table('users')->min();
+    
+    DB::table('users')->avg();
+    
+    DB::table('users')->count();
+
+
+
+* * *
+
+### END
+
+*This will be regularly maintained, each time more methods will be added and existing ones will be refined. I will try to keep this as compatible so if you update everything should remain working*
+    
