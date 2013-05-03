@@ -274,7 +274,7 @@ class DB
   /**
    * Get the count of the items in a column
    * @param  string $column The name of the column
-   * @return [type]         [description]
+   * @return int The record count
    */
   public function count($column = '*')
   {
