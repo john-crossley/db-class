@@ -398,7 +398,7 @@ class DB
     return $this;
   }
 
-  public function distinct()
+  private function distinct()
   {
     $this->query = "SELECT DISTINCT * FROM $this->table";
     return $this;
