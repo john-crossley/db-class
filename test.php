@@ -16,12 +16,19 @@ DB::connect([
 
 // var_dump($data);
 
-$id = DB::table('users')->insert([
-  'username' => 'poppy123',
-  'email' => 'hello@poppy.com',
-  'password' => sha1('password'),
-  'firstname' => 'Poppy',
-  'lastname' => 'McGowan'
-]);
+// $id = DB::table('users')->insert([
+//   'username' => 'poppy123',
+//   'email' => 'hello@poppy.com',
+//   'password' => sha1('password'),
+//   'firstname' => 'Poppy',
+//   'lastname' => 'McGowan'
+// ]);
 
-var_dump($id);
+// var_dump($id);
+
+// $update = DB::table('users')->where('id', '=', 2)->update(array(
+//   'username' => 'james.mcavady'
+// ));
+
+
+var_dump(DB::table('users')->where('id', '=', 13)->delete());
