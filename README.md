@@ -1,5 +1,8 @@
 # My Super Awesome Query Builder!
 
+## THIS README NEEDS UPDATING THE DB API HAS SLIGHTLY CHANGED.
+## I WILL BE UPDATING THIS SOOOOON.
+
 I have built a simple more-or-less full featured database query builder. It works similar to laravels amazing fluent query builder only I decided to buid my own ^_^ This is not final but can be used, modified and extended. If you'd like me to add anything else or change something lemme know.
 
 Right so, using this is sooo simple. Continue reading to learn how!
@@ -148,7 +151,7 @@ Just update the data by specifying the column names. This will return a BOOL.
 To delete a record use the following command:
 
     DB::table('users')->where('id', '=', 1)->delete();
-    
+
 This will…? Yepp you guessed it, delete the user with the ID of 1
 
 … So what if you want to delete all the records from the user table?
