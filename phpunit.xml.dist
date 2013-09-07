@@ -1,0 +1,13 @@
+<phpunit bootstrap="bootstrap.php"
+         colors="true">
+<filter>
+  <blacklist>
+    <file>src/DB.php</file>
+  </blacklist>
+</filter>
+<testsuites>
+  <testsuite name="DB Test Suite">
+    <directory>test/</directory>
+  </testsuite>
+</testsuites>
+</phpunit>
