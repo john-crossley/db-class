@@ -243,7 +243,12 @@ class DB
     // DELETE FROM message WHERE id IN (4, 5)
     // SELECT * FROM `user` WHERE `id` IN (1, 2, 4)
 
-    $this->where = $column . ' IN (' . implode(', ', $data) . ')';
+    $newData = array();
+    foreach ($data as $value) {
+      $newData[] = (is_integer($value)) ? $value : '\''.$value.'\'';
+    }
+
+    $this->where = '`'.$column . '`' . ' IN (' . implode(', ', $newData) . ')';
 
     return $this;
   }
@@ -255,7 +260,7 @@ class DB
    */
   public function like($column, $value)
   {
-    $this->where($column, 'LIKE', "'%$value%'");
+    $this->where('`'.$column.'`', 'LIKE', "'%$value%'");
     return $this;
   }
 
