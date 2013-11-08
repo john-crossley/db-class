@@ -86,6 +86,11 @@ class DB
 
   public static function connect(array $connect)
   {
+    if (!isset($connect['host']) || !isset($connect['username'])
+      || !isset($connect['password']) || !isset($connect['database'])) {
+      throw new Exception('Failed to provide valid database connection information.');
+    }
+
     self::$host = $connect['host'];
     self::$username = $connect['username'];
     self::$password = $connect['password'];
@@ -448,7 +453,7 @@ class DB
   public function first($last = false)
   {
     $primary_key = $this->get_primary_key();
-    $this->from = ' FROM ' . $this->table;
+    $this->from = ' FROM ' . '`' . $this->table . '`';
     $this->order = ' ORDER BY ' . $primary_key;
     $this->order .= ($last === true) ? ' DESC' : '';
     $this->limit = 1;
@@ -462,9 +467,9 @@ class DB
   {
     // TODO: Check!
     if (empty($this->order)) {
-      $this->order = ' ORDER BY ' . $column . ' ' . $keyword;
+      $this->order = ' ORDER BY ' . '`' . $column . '`' . ' ' . strtoupper($keyword);
     } else {
-      $this->order .= ', ' . $column . ' ' . $keyword;
+      $this->order .= ', ' . '`' . $column . '`' . ' ' . strtoupper($keyword);
     }
     return $this;
   }
@@ -490,16 +495,16 @@ class DB
    */
   public function find($data, $column = null)
   {
-    $this->from = ' FROM ' . $this->table;
+    $this->from = ' FROM ' . '`' . $this->table . '`';
     if (is_array($data) && $column === null) {
       // We have been passed a bundle of joy
       foreach ($data as $key => $value) {
-        $this->where($key, '=', $value);
+        $this->where('`'.$key . '`', '=', '\'' . $value . '\'');
       }
     } else {
       // Assume this is an INT for ID
       $this->limit = 1;
-      $this->where(!is_null($column) ? $column : 'id', '=', (int)$data);
+      $this->where(!is_null($column) ? $column : '`id`', '=', (int)$data);
     }
     return $this->execute();
   }
@@ -512,7 +517,7 @@ class DB
    */
   public function get(array $columns = array())
   {
-    $this->from = ' FROM ' . $this->table;
+    $this->from = ' FROM ' . '`' .$this->table . '`';
     if (!empty($columns)) $this->columns = $columns;
     return $this->execute();
   }
@@ -594,7 +599,6 @@ class DB
 
     $sth->execute($this->query_data);
 
-    // // Any debugging sir?
     if (self::$debug) {
       echo "Database Errors";
       var_dump($this->conn->errorInfo());
@@ -611,9 +615,6 @@ class DB
       echo "Where Clause";
       var_dump($this->where);
       echo "<br>";
-
-      // echo "Return from the database";
-      // return;
     }
 
     switch (strtoupper($type)) {
