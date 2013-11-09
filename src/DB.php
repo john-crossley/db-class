@@ -228,12 +228,12 @@ class DB
     return $this->execute('UPDATE');
   }
 
-  public function delete($columns = '', $all = false)
+  public function delete($all = false)
   {
     if (empty($this->where) && $all === false) {
       throw new \Exception('Warning: You are trying to delete all the records.');
     }
-    $this->query = 'DELETE '.$columns.' FROM ' . $this->table;
+    $this->query = 'DELETE FROM ' . $this->table;
     return $this->execute('DELETE');
   }
 

@@ -42,9 +42,29 @@ try {
 
     // $db = DB::table('user')->only('username', 'email');
 
-    $db = DB::table('user')->only('username', 'email');
+//    $db = DB::table('user')->only('username', 'email');
+
+//  $db = DB::table('user')->insert(array(
+//    'username' => 'my.username',
+//    'password' => sha1('password'),
+//    'email'    => 'this.email@example.com'
+//  ));
 
 
+//  $db = DB::table('user')->insert_get_id(array(
+//    'username' => 'my.new.username',
+//    'password' => sha1('password123'),
+//    'email'    => 'this.email.another@example.com'
+//  ));
+
+//  $db = DB::table('user')->where('id', '=', 4)->update(array(
+//    'firstname' => 'Funky',
+//    'lastname' => 'Pidgin'
+//  ));
+//
+//  $db = DB::table('user')->where('id', '=', 4)->delete();
+
+//    $db = DB::table('user')->delete(true);
 
 
 
