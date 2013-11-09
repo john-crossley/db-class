@@ -38,6 +38,13 @@ try {
 
 //  $db = DB::table('user')->left_join('setting', 'user.username', '=', 'admin')->get();
 
+//    $db = DB::table('user')->grab(10)->get();
+
+    // $db = DB::table('user')->only('username', 'email');
+
+    $db = DB::table('user')->only('username', 'email');
+
+
 
 
 

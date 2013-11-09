@@ -303,8 +303,6 @@ class DB
   }
 
   /**
-   * Unfinished
-   *
    * Join two tables together
    * @param  string $table    The name of the table to join
    * @param  string $col1     The name of the first column
@@ -322,8 +320,6 @@ class DB
   }
 
   /**
-   * Unfinished
-   *
    * Left join two tables together
    * @param  string $table    The name of the table to join
    * @param  string $col1     The name of the first column
