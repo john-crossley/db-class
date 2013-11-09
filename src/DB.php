@@ -223,7 +223,6 @@ class DB
       $this->query_data[] = $value;
     }
 
-    // $this->query_data = array_merge($this->query_data, $where_data);
     $this->from = null;
 
     return $this->execute('UPDATE');
@@ -316,7 +315,8 @@ class DB
    */
   public function join($table, $col1, $operator = null, $col2 = null, $type = 'INNER')
   {
-    $join = "$type JOIN $table ON $col1 $operator $col2";
+    $join = $type . ' JOIN ' . '`'.$table. '`' . ' ON ' . ' '
+      .$col1 . ' ' . $operator . ' '. (is_integer($col2) ? $col2 : '\''.$col2 . '\'');
     $this->join .= ' ' . $join;
     return $this;
   }
@@ -342,11 +342,9 @@ class DB
    * @param  string $column The name of the column
    * @return array|bool
    */
-  public function min($column)
+  public function min($column = null)
   {
-    $this->limit = 1;
-    $this->query = "SELECT MIN($column) as min FROM $this->table";
-    return $this->execute();
+    return $this->minOrMax($column, 'MIN');
   }
 
   /**
@@ -354,12 +352,22 @@ class DB
    * @param  string $column The name of the column to find maximum.
    * @return integer|false
    */
-  public function max($column)
+  public function max($column = null)
   {
+    return $this->minOrMax($column, 'MAX');
+  }
+
+  private function minOrMax($column = null, $minOrMax = 'MAX')
+  {
+    if (is_null($column)) {
+      $column = $this->get_primary_key();
+    }
+    $minOrMax = ($minOrMax==='MAX' ? 'MAX' : 'MIN');
     $this->limit = 1;
-    $this->query = "SELECT MAX($column) as max FROM $this->table";
+    $this->query = "SELECT ".strtoupper($minOrMax)."($column) as ".strtolower($minOrMax)." FROM $this->table";
     return $this->execute();
   }
+
 
   /**
    * Get the average of a column
