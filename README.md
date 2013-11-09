@@ -105,7 +105,24 @@ To find the first and last records from a table you can use the following code:
 
     DB::table('users')->only('username')->first();
     DB::table('users')->only('username', 'password', 'email')->last();
+    
+### Only
+You can use an only method to return only the fields you'd like. (Rather than specifying this in the get method)
 
+	DB::table('user')->only('username AS user', 'email');
+
+Takes an unlimited number of arguments.
+
+### ORDER BY
+You can order the data using the following code:
+
+	DB::table('user')->order_by('id', 'DESC')->get();
+	DB::table('user')->order_by('id', 'ASC')->get();
+	
+### LIKE
+You can specify a LIKE, like so:
+
+	DB::table('user')->like('username', 'car')->get();
 
 ### Where
 
