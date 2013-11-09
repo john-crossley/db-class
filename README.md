@@ -38,7 +38,7 @@ This as is will return an array of objects. If no results are found then an empt
 	    	'email',
 	    	'password'
 	    ));
-	    
+
 You can even change their name:
 
 	    DB::table('users')->get(array(
@@ -65,7 +65,7 @@ I have implemented the use of dynamic methods. Check the following examples to l
     DB::table('users')->findByFirstname('John');
 
     DB::table('users')->findByEmail('hello@phpcodemonkey.com');
-    
+
     DB::table('users')->findByUsernameAndPassword('username', sha1('password'));
 
 Just follow the pattern **findBySomething**, **findBySomethingAndSomethingElse*** Make sure you pass in the correct number of arguments to the function.
@@ -76,21 +76,21 @@ Just follow the pattern **findBySomething**, **findBySomethingAndSomethingElse**
 I have recently implemented the use of SQL joins, not my favourite subject.
 
 	DB::table('user')->join('col1', 'user.id', '=', 1)->get();
-	
+
 By default this will produce an INNER join. You can however specify what join you'd like.
-	
+
 	DB::table('user')->join('col1', 'user.id', '=', 1, 'LEFT')->get();
-	
+
 	DB::table('user')->join('col1', 'user.id', '=', 1, 'OUTER)->get();
-	
+
 There is also a left join function:
 
 	DB::table('user')->left_join('col1', 'user.id', '=', 1)->get();
-	
+
 You can also specify the data you would like to retrieve like so:
 
 	DB::table('user')->join('col1', 'user.id', '=', 1)->get(array('col1.field2 AS new_field', 'user.username AS uber_name', 'user.password'));
-	
+
 You understand right?
 
 ### First and Last
@@ -105,7 +105,7 @@ To find the first and last records from a table you can use the following code:
 
     DB::table('users')->only('username')->first();
     DB::table('users')->only('username', 'password', 'email')->last();
-    
+
 ### Only
 You can use an only method to return only the fields you'd like. (Rather than specifying this in the get method)
 
@@ -118,7 +118,7 @@ You can order the data using the following code:
 
 	DB::table('user')->order_by('id', 'DESC')->get();
 	DB::table('user')->order_by('id', 'ASC')->get();
-	
+
 ### LIKE
 You can specify a LIKE, like so:
 
@@ -153,7 +153,7 @@ This will return only the usernames of 300 records.
 
 We can apply some order to these results like so:
 
-    DB::table('users')->only('username')->grab(300)->order('id', 'ASC')->get();
+    DB::table('users')->only('username')->grab(300)->order_by('id', 'ASC')->get();
 
 These can be applied in any order providing its after the table() and before the get method.
 
