@@ -1,6 +1,6 @@
 # Fluent Database Query Builder
 
-Only works with MYSQL as of version 1.0, more coming soon.
+**Only works with MYSQL as of version 1.0, more coming soon.**
 
 I have built a simple more-or-less full featured database query builder. It works similar to laravels amazing fluent query builder only I decided to build my own ^_^ This is not final but can be used, modified and extended. If you'd like me to add anything else or change something let me know.
 
